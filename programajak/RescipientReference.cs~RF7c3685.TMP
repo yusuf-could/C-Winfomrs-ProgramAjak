@@ -1,0 +1,155 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using MySql.Data.MySqlClient;
+
+namespace programajak
+{
+    public partial class RescipientReference : Form
+    {
+        public RescipientReference()
+        {
+            InitializeComponent();
+            
+        }
+
+        MySqlConnection cn;
+        MySqlCommand cmd;
+        MySqlDataAdapter adp;
+        MySqlDataReader adr;
+
+        private void GetAllSatelliteRecord()
+        {
+            cmd = new MySqlCommand("ApproveDebitur", cn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("_NameDebitur", " ");
+            cmd.Parameters.AddWithValue("_TokenDebitur", 0);
+            cmd.Parameters.AddWithValue("_NameCustomer", " ");
+            cmd.Parameters.AddWithValue("_ActionType", "3");
+            adp = new MySqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            adp.Fill(dt);
+            dataGridView2.DataSource = dt;
+
+        }
+
+        private void ClearData()
+        {
+            txtNama.Text = "";
+            txtToken.Text = "";
+            txtReference.Text = "";
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+           
+            
+        }
+
+        private void btnSearchNasabah_Click(object sender, EventArgs e)
+        {
+            this.tblcustomer_tmTableAdapter.Fill(this.ajak.tblcustomer_tm, txtSearchNasabah.Text);
+            this.dataGridView1.Refresh();
+        }
+
+        private void RescipientReference_Load(object sender, EventArgs e)
+        {
+            cn = new MySqlConnection(@"server=192.168.1.12; user id=root; password=@Qwert!123; persistsecurityinfo=True; database=sgsprod");
+            cn.Open();
+            // TODO: This line of code loads data into the 'ajak.tbldebitur_tk' table. You can move, or remove it, as needed.
+            this.tblcustomer_tmTableAdapter.FillBy(this.ajak.tblcustomer_tm);
+            this.dataGridView1.Refresh();
+            this.tbldebitur_tkTableAdapter.Fill(this.ajak.tbldebitur_tk);
+            this.dataGridView2.Refresh();
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            lblId.Text = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+            txtNama.Text = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+            btnClear.Enabled = false;
+            btnUpdate.Enabled = false;
+        }
+
+        private void txtQty_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verify that the pressed key isn't CTRL or any non-numeric digit
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '.'))
+            {
+                e.Handled = true;
+            }
+
+            // If you want, you can allow decimal (float) numbers
+            if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            if ( txtNama.Text != string.Empty && txtToken.Text != string.Empty && txtReference.Text != string.Empty)
+            {
+                cmd = new MySqlCommand("ApproveDebitur", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("_IdDebitur", 0);
+                cmd.Parameters.AddWithValue("_NameDebitur", txtNama.Text);
+                cmd.Parameters.AddWithValue("_TokenDebitur", txtToken.Text);
+                cmd.Parameters.AddWithValue("_NameCustomer", txtReference.Text);
+                cmd.Parameters.AddWithValue("_ActionType", "1");
+                cmd.ExecuteNonQuery();
+                MessageBox.Show("Data berhasil ditambahkan !!", "Record Inserted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ClearData();
+                GetAllSatelliteRecord();
+            }
+            else
+            {
+                MessageBox.Show("Gagal menambahkan data !!", "Invalid Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void btnSearch2_Click(object sender, EventArgs e)
+        {
+            this.tbldebitur_tkTableAdapter.FillBy(this.ajak.tbldebitur_tk, txtSearch2.Text);
+            this.dataGridView2.Refresh();
+        }
+
+        private void dataGridView2_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            lblId.Text = dataGridView2.Rows[e.RowIndex].Cells[0].Value.ToString();
+            txtNama.Text = dataGridView2.Rows[e.RowIndex].Cells[1].Value.ToString();
+            txtToken.Text = dataGridView2.Rows[e.RowIndex].Cells[2].Value.ToString();
+            txtReference.Text = dataGridView2.Rows[e.RowIndex].Cells[2].Value.ToString();
+            btnSave.Enabled = false;
+            btnClear.Enabled = false;
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            if (txtNama.Text != string.Empty && txtToken.Text != string.Empty && txtReference.Text != string.Empty)
+            {
+                cmd = new MySqlCommand("ApproveDebitur", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("_IdDebitur", 0);
+                cmd.Parameters.AddWithValue("_NameDebitur", txtNama.Text);
+                cmd.Parameters.AddWithValue("_TokenDebitur", txtToken.Text);
+                cmd.Parameters.AddWithValue("_NameCustomer", txtReference.Text);
+                cmd.Parameters.AddWithValue("_ActionType", "2");
+                cmd.ExecuteNonQuery();
+                MessageBox.Show("Data berhasil dirubah !!", "Record Inserted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ClearData();
+                GetAllSatelliteRecord();
+            }
+            else
+            {
+                MessageBox.Show("Gagal merubah data !!", "Invalid Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+    }
+}

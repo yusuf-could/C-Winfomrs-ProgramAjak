@@ -1,0 +1,237 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using programajak.controller;
+using programajak.Model;
+
+namespace programajak
+{
+    public partial class ApproveVoucer : Form
+    {
+
+        private DataTable Dt;
+        private ApproveDebitur Apd;
+        private Approve_Debitur Ad;
+       
+        public ApproveVoucer()
+        {
+            InitializeComponent();
+        }
+
+        private bool ValidationSave()
+        {
+            if (string.IsNullOrEmpty(txtCIF.Text))
+            {
+                MessageBox.Show("CIF belom di isi Lohhhh !!!");
+                txtCIF.Focus();
+            }
+            else if (string.IsNullOrEmpty(txtNama.Text))
+            {
+                MessageBox.Show("Nama belom di isi Lohhhh !!!");
+                txtNama.Focus();
+            }
+            else if (string.IsNullOrEmpty(txtQty.Text))
+            {
+                MessageBox.Show("Qty belom di isi Lohhhh !!!");
+                txtQty.Focus();
+            }
+            else if (string.IsNullOrEmpty(txtVoucer.Text))
+            {
+                MessageBox.Show("Voucer belom di isi Lohhhh !!!");
+                txtVoucer.Focus();
+            }
+            else
+            {
+                return true;
+            }
+
+            return false;
+
+        }
+
+
+        private void ClearData()
+        {
+            txtCIF.Text = "";
+            txtNama.Text = "";
+            txtQty.Text = "";
+            txtVoucer.Text = "";
+            lblID.Text = "";
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            lblID.Text = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+            txtCIF.Text = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+            txtNama.Text = dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.tblcustomer_tmTableAdapter.Fill(this.ajak.tblcustomer_tm, txtSearch.Text);
+
+            this.dataGridView1.Refresh();
+        }
+
+        private void ApproveVoucer_Load(object sender, EventArgs e)
+        {
+            // TODO: This line of code loads data into the 'ajak.tblapprovevoucer' table. You can move, or remove it, as needed.
+            //this.tblapprovevoucerTableAdapter.Fill(this.ajak.tblapprovevoucer);
+
+            this.tblcustomer_tmTableAdapter.FillBy(this.ajak.tblcustomer_tm);
+            this.dataGridView1.Refresh();
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            lblID.Text = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+            txtCIF.Text = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+            txtNama.Text = dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString();
+        }
+
+        private void txtQty_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtQty_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verify that the pressed key isn't CTRL or any non-numeric digit
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '.'))
+            {
+                e.Handled = true;
+            }
+
+            // If you want, you can allow decimal (float) numbers
+            if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (ValidationSave())
+                {
+                    Ad = new Approve_Debitur();
+                    Ad.Id = lblID.Text;
+                    Ad.Cif = txtCIF.Text;
+                    Ad.Name = txtNama.Text;
+                    Ad.Qty = int.Parse(txtQty.Text);
+                    Ad.Total = int.Parse(txtVoucer.Text);
+                    //Ad.Date = DateTime.Parse(dateTimePicker1.Text);
+                    
+                    Apd = new ApproveDebitur();
+                    if (Apd.Insert(Ad))
+                    {
+                        lblflash.Text = "Data " + Ad.Name + " Berhasil di Simpan !";
+                        lblflash.ForeColor = Color.Green;
+                        ClearData();
+                    }
+                    else
+                    {
+                        lblflash.Text = "Data " + Ad.Cif + " GAGAL di Simpan !";
+                        lblflash.ForeColor = Color.Red;
+                    }
+                    //DisplayDataAllAsTable();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Errornya adalah : " + ex.Message.ToString());
+            }
+        }
+
+        private void GetAllData(string Value)
+        {
+            if (!string.IsNullOrEmpty(Value))
+            {
+                Apd = new ApproveDebitur();
+                Dt = Apd.GetAllDataDebitur( Value);
+                //DataGridView dataGridView2 = new DataGridView();
+               
+                dataGridView2.DataSource = null;
+                dataGridView2.Columns.Clear();
+                dataGridView2.DataSource = Dt;
+                dataGridView2.AllowUserToAddRows = false;
+                dataGridView2.ReadOnly = true;
+                dataGridView2.Columns[0].Width = 100;
+                dataGridView2.Columns[0].HeaderText = "No";
+                dataGridView2.Columns[1].Width = 100;
+                dataGridView2.Columns[1].HeaderText = "CIF";
+                dataGridView2.Columns[2].Width = 200;
+                dataGridView2.Columns[2].HeaderText = "Nama";
+                dataGridView2.Columns[3].Width = 50;
+                dataGridView2.Columns[3].HeaderText = "Qty";
+                dataGridView2.Columns[4].Width = 100;
+                dataGridView2.Columns[4].HeaderText = "Totao Voucer";
+                dataGridView2.Columns[5].Width = 100;
+                dataGridView2.Columns[5].HeaderText = "Tanggal";
+            }
+        }
+
+        private void DisplayDataAllAsTable()
+        {
+            try
+            {
+                txtCIF.ReadOnly = true;
+                Apd = new ApproveDebitur();
+                Dt = Apd.GetAllData();
+                //DataGridView dataGridView2 = new DataGridView();
+                //dataGridView2.Columns[0].Name = "ID";
+                dataGridView2.DataSource = null;
+                dataGridView2.Columns.Clear();
+                dataGridView2.DataSource = Dt;
+                dataGridView2.AllowUserToAddRows = false;
+                dataGridView2.ReadOnly = true;
+                dataGridView2.Columns[0].Width = 100;
+                dataGridView2.Columns[0].HeaderText = "No";
+                dataGridView2.Columns[1].Width = 100;
+                dataGridView2.Columns[1].HeaderText = "CIF";
+                dataGridView2.Columns[2].Width = 200;
+                dataGridView2.Columns[2].HeaderText = "Nama";
+                dataGridView2.Columns[3].Width = 50;
+                dataGridView2.Columns[3].HeaderText = "Qty";
+                dataGridView2.Columns[4].Width = 100;
+                dataGridView2.Columns[4].HeaderText = "Total Voucer";
+                dataGridView2.Columns[5].Width = 100;
+                dataGridView2.Columns[5].HeaderText = "Tanggal";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Errornya adalah " + ex.Message.ToString());
+            }
+        }
+
+        private void btnSearch2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string value = txtSearch2.Text;
+
+                if (!string.IsNullOrEmpty(value))
+                {
+                    GetAllData(value);
+                }
+                else
+                {
+                    DisplayDataAllAsTable();
+                }
+            }
+            catch (Exception) { }
+        }
+
+        private void btnRefesh_Click(object sender, EventArgs e)
+        {
+            DisplayDataAllAsTable();
+        }
+    }
+}

@@ -1,0 +1,162 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using MySql.Data.MySqlClient;
+
+namespace programajak
+{
+    public partial class ApproveVoucer : Form
+    {
+       
+        public ApproveVoucer()
+        {
+            InitializeComponent();
+        }
+
+        MySqlConnection cn;
+        MySqlCommand cmd;
+        MySqlDataAdapter adp;
+        MySqlDataReader adr;
+
+        private void ClearData()
+        {
+            lblID.Text = "";
+            txtCIF.Text = "";
+            txtNama.Text = "";
+            txtQty.Text = "";
+            txtVoucer.Text = "";
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            lblID.Text = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+            txtCIF.Text = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+            txtNama.Text = dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString();
+            btnUpdate.Enabled = false;
+            btnDelete.Enabled = false;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.tblcustomer_tmTableAdapter.Fill(this.ajak.tblcustomer_tm, txtSearch.Text);
+
+            this.dataGridView1.Refresh();
+        }
+
+        private void ApproveVoucer_Load(object sender, EventArgs e)
+        {
+            // TODO: This line of code loads data into the 'sgsprodDataSet1.tblapprovevoucer' table. You can move, or remove it, as needed.
+            this.tblapprovevoucerTableAdapter.Fill(this.sgsprodDataSet1.tblapprovevoucer);
+            cn = new MySqlConnection(@"server=192.168.1.12; user id=root; password=@Qwert!123; persistsecurityinfo=True; database=sgsprod");
+            cn.Open();
+            
+            GetAllSatelliteRecord();
+            //disable delete and update button on load
+           
+            this.tblcustomer_tmTableAdapter.FillBy(this.ajak.tblcustomer_tm);
+            this.dataGridView1.Refresh();
+        }
+        private void GetAllSatelliteRecord()
+        {
+            cmd = new MySqlCommand("ApproveVoucer", cn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("_CIF", " ");
+            cmd.Parameters.AddWithValue("_NameCustomer", " ");
+            cmd.Parameters.AddWithValue("_Qty", 0);
+            cmd.Parameters.AddWithValue("_TotalQty", 0);
+            cmd.Parameters.AddWithValue("_ActionType", "5");
+            adp = new MySqlDataAdapter(cmd);
+            DataTable dt = new DataTable();
+            adp.Fill(dt);
+            dataGridView2.DataSource = dt;
+
+        }
+
+        private void txtQty_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtQty_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verify that the pressed key isn't CTRL or any non-numeric digit
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '.'))
+            {
+                e.Handled = true;
+            }
+
+            // If you want, you can allow decimal (float) numbers
+            if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            if (txtCIF.Text != string.Empty && txtNama.Text != string.Empty && txtQty.Text != string.Empty && txtVoucer.Text != string.Empty)
+            {
+                cmd = new MySqlCommand("ApproveVoucer", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("_CIF", txtCIF.Text);
+                cmd.Parameters.AddWithValue("_NameCustomer", txtNama.Text);
+                cmd.Parameters.AddWithValue("_Qty", txtQty.Text);
+                cmd.Parameters.AddWithValue("_TotalQty", txtVoucer.Text);
+                cmd.Parameters.AddWithValue("_ActionType", "1");
+                cmd.ExecuteNonQuery();
+                MessageBox.Show("Data berhasil ditambahkan !!", "Record Inserted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                GetAllSatelliteRecord();
+                ClearData();
+            }
+            else
+            {
+                MessageBox.Show("Gagal menambahkan data !!", "Invalid Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        
+
+        private void btnSearch2_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void btnRefesh_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void dataGridView2_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            txtCIF.Text = dataGridView2.Rows[e.RowIndex].Cells[0].Value.ToString();
+            txtNama.Text = dataGridView2.Rows[e.RowIndex].Cells[1].Value.ToString();
+            txtQty.Text = dataGridView2.Rows[e.RowIndex].Cells[2].Value.ToString();
+            txtVoucer.Text = dataGridView2.Rows[e.RowIndex].Cells[3].Value.ToString();
+            btnDelete.Enabled = false;
+            button2.Enabled = false;
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            lblID.Text = "";
+            txtCIF.Text = "";
+            txtNama.Text = "";
+            txtQty.Text = "";
+            txtVoucer.Text = "";
+            btnDelete.Enabled = true;
+            button2.Enabled = true;
+            btnUpdate.Enabled = true;
+        }
+    }
+}

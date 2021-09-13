@@ -1,0 +1,96 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using programajak.controller;
+
+namespace programajak
+{
+    public partial class ApproveVoucer : Form
+    {
+        Voucer db = new Voucer();
+        public ApproveVoucer()
+        {
+            InitializeComponent();
+        }
+        private void ClearData()
+        {
+            txtCIF.Text = "";
+            txtNama.Text = "";
+            txtQty.Text = "";
+            txtVoucer.Text = "";
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            txtCIF.Text = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+            txtNama.Text = dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.tblcustomer_tmTableAdapter.Fill(this.ajak.tblcustomer_tm, txtSearch.Text);
+
+            this.dataGridView1.Refresh();
+        }
+
+        private void ApproveVoucer_Load(object sender, EventArgs e)
+        {
+            this.tblcustomer_tmTableAdapter.FillBy(this.ajak.tblcustomer_tm);
+            this.dataGridView1.Refresh();
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            txtCIF.Text = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+            txtNama.Text = dataGridView1.Rows[e.RowIndex].Cells[2].Value.ToString();
+        }
+
+        private void txtQty_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtQty_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Verify that the pressed key isn't CTRL or any non-numeric digit
+            if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar) && (e.KeyChar != '.'))
+            {
+                e.Handled = true;
+            }
+
+            // If you want, you can allow decimal (float) numbers
+            if ((e.KeyChar == '.') && ((sender as TextBox).Text.IndexOf('.') > -1))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            create();
+            ClearData();
+        }
+
+        public void read()
+        {
+            dataGridView2.DataSource = null;
+            db.read_data();
+            dataGridView2.DataSource = db.dt;
+        }
+
+        public void create()
+        {
+            db.cif = txtCIF.Text;
+            db.username = txtNama.Text;
+            db.qty = txtQty.Text;
+            db.total_voucer = txtVoucer.Text;
+            db.create_data();
+        }
+    }
+}
